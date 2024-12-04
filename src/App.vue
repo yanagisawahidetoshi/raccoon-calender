@@ -18,9 +18,10 @@ import {
   startOfMonth,
   lastOfMonth,
   getEachDateOfMonth,
-  changeMonth,
-  changeToCurrentMonth,
-  formatDateType,
+  addMonths,
+  getNewDate,
+  format,
+  parse,
 } from "./libs/date-fns";
 
 export default {
@@ -28,7 +29,7 @@ export default {
   components: {},
   data() {
     return{
-      baseDate: new Date(),
+      baseDate: null,
     }
   },
   computed: {
@@ -38,25 +39,27 @@ export default {
       return getEachDateOfMonth(startDate, lastDate);
     }
   },
+  mounted(){
+    const currentPath = window.location.pathname;
+    const matchPath = currentPath.match(/(\d{4})\/(0?[1-9]|1[0-2])$/);
+    if (matchPath === null) {
+      this.baseDate = new Date();
+      return this.baseDate;
+    }
+    this.baseDate = parse(matchPath[1] + "/" + matchPath[2], "yyyy/MM");
+  },
   methods: {
     formatDate(date, setting){
-      return formatDateType(date, setting);
+      return format(date, setting);
     },
     changeToCurrentMonth() {
-      this.baseDate = changeToCurrentMonth();
+      this.baseDate = getNewDate();
+      window.location.pathname = format(this.baseDate, "yyyy/MM");
     },
     changeMonth(num) {
-      this.baseDate = changeMonth(this.baseDate, num);
+      this.baseDate = addMonths(this.baseDate, num);
+      window.location.pathname = format(this.baseDate, "yyyy/MM");
     },
   },
-  mounted(){
-    // ~/{西暦４桁}/{月1or2桁} を判断する正規表現。どんなURLにも対応できるように
-    const currentUrl = window.location.href;
-    const matchUrl = currentUrl.match(/https?:\/\/.+\/(\d{4})\/(\d{1,2})/);
-    if (matchUrl) {
-      console.log(matchUrl[1]);
-      console.log(matchUrl[2]);
-    }
-  }
 };
 </script>

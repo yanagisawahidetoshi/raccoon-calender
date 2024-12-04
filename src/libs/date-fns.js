@@ -3,8 +3,8 @@ import {
   eachDayOfInterval as dateFnsEachDayOfInterval,
   lastDayOfMonth as dateFnsLastOfMonth,
   parse as dateFnsParse,
-  format,
-  addMonths
+  format as dateFnsFormat,
+  addMonths as dateFnsAddMonth
 }from 'date-fns';
 import ja from 'date-fns/locale/ja'
 
@@ -20,15 +20,15 @@ export const getEachDateOfMonth = (startDate, lastDate) => {
     end: lastDate
   });
 }
-export const changeMonth = (date, num) => {
-  return addMonths(date, num);
+export const addMonths = (date, num) => {
+  return dateFnsAddMonth(date, num);
 }
-export const changeToCurrentMonth = () => {
+export const getNewDate = () => {
   return new Date();
 }
-export const formatDateType = (date, setting) => {
-  return format(date, setting, {locale: ja});
+export const format = (date, formatSetting) => {
+  return dateFnsFormat(date, formatSetting, {locale: ja});
 }
-export const parse = (string, dateFormat) => {
-  return dateFnsParse(string, dateFormat, new Date());
+export const parse = (dateString, formatSetting) => {
+  return dateFnsParse(dateString, formatSetting, new Date());
 }
