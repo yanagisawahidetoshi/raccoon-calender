@@ -35,8 +35,12 @@
       </li>
     </ul>
     <h1 class="title">{{ formatDate(date, "yyyy年M月") }}</h1>
-    <CommonButton @click="openModalAddSchedule">登録</CommonButton>
-    <ScheduleRegisterModal @registeredSchedule="(v) => $emit('registeredSchedule', v)" />
+    <CommonButton @click="isModalOpen = true">登録</CommonButton>
+    <ScheduleRegisterModal
+      @registeredSchedule="(v) => $emit('registeredSchedule', v)"
+      @closeModal="closeModal"
+      :isModalOpen="isModalOpen"
+    />
   </header>
 </template>
 <script>
@@ -46,6 +50,11 @@ import ScheduleRegisterModal from "@/components/morcules/ScheduleRegisterModal";
 
 export default {
   name: "CalenderHeader",
+  data() {
+    return {
+      isModalOpen: false,
+    };
+  },
   props: {
     date: {
       type: Date,
@@ -59,11 +68,9 @@ export default {
     formatDate(date, pattern) {
       return format(date, pattern);
     },
-    openModalAddSchedule() {
-      this.$vm2.open("modal-add-schedule");
-    },
-    closeModalAddSchedule() {
-      this.$vm2.close("modal-add-schedule");
+    closeModal(v) {
+      console.log(v);
+      this.isModalOpen = v;
     },
   },
 };

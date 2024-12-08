@@ -84,41 +84,6 @@ export default {
     this.currentDate = 
       parse(`${result[1]}-${result[2]}`, "yyyy-MM", new Date())
     ;
-
-    // メモ
-    // const url = location.href;
-    // const regexp =
-    //   /https?:\/\/.*\/\?year=([1-2][0-9]{3})&month=(1[0-2]|0?[1-9])/;
-    // // const regexp = /\/(19[0-9]{2}|2[0-9]{3})\/([0-9]{1,2})/;
-    // // ^(?![1])0?[1-9]$
-    // const result = url.match(regexp);
-    // if (result !== null) {
-    //   this.url.month = result[2];
-    //   this.url.year = result[1];
-    // }
-    // console.log(this.url.month);
-    // const result = url.match(regexp);
-    // // console.log(result);
-    // this.url.month = result[2] !== null ? result[2] : null;
-    // this.url.year = result[1] !== null ? result[1] : null;
-    // console.log(this.url);
-    // let regexp = /([0-9]{4})(?:\/)([0-9]{2})/;
-    // let result = regexp.exec(url);
-    // this.url.month = result[2];
-    // this.url.year = result[1];
-    // console.log(this.url);
-
-    // this.url.year = url.match(/\/[0-9]{4}\//)[0].substring(1, 5);
-    // this.url.month = url.match(/\/[0-9]{2}\//)[0].substring(1, 3);
-    // const [year, month] = [...url.matchAll(/[0-9]{2,4}/g)];
-    // this.url.year = year[0];
-    // this.url.month = month[0];
-    // const res = url.match(/[0-9]{2,4}/g);
-    // this.url.year = res[res.length - 1];
-    // this.url.month = res[res.length - 2];
-    // const regex1 = /(\/[0-9]{2,4}\/)/g;
-    // const res2 = regex1.exec(url);
-    // console.log(res2)
   },
   watch: {
     currentDate(newCurrentDate) {
