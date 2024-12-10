@@ -1,41 +1,55 @@
 <template>
   <div>
     <CalenderHeader
-      :dispDate="dispDate"
+      :formatDate="formatDate"
       @changeMonth="changeMonth"
       @changeCurrentMonth="changeCurrentMonth"
       @registerSchedule="registerSchedule"
+      @modalOpen="modalOpen"
     />
     {{ /* 日付と曜日を出力 */ }}
-    <ol class="date-list">
-      <li v-for="(n, index) in calendar" :key="index">
-        <DateItem
-          :date="n.date"
-          :day="n.day"
-          :scheduleDate="getSchedule(n.date)"
-        />
-      </li>
-    </ol>
+    <CalenderFild
+      :daysOfWeek="daysOfWeek"
+      :calendar="calendar"
+      :schedules="rgistedSchedule"
+      @editModalOpen="editModalOpen"
+    />
+    {{ /* 新規の場合、編集IDはあり得ない数字にする */ }}
+    <ScheduleRegistModal
+      :isModalOpen="isModalOpen"
+      :isEditType="isEditType"
+      :editScheduleIndex="isEditType ? editScheduleIndex : -1"
+      :editSchedule="editSchedule"
+      @modalClose="modalClose"
+      @registerSchedule="registerSchedule($event)"
+      @updatedSchedule="updatedSchedule($event)"
+    />
   </div>
 </template>
 
 <script>
 import {
   format,
-  dateInterval,
+  //dateInterval,
   addMonths,
+  addDays,
   startOfMonth,
   endOfMonth,
   getDay,
+  eachWeekOfInterval,
+  eachDayOfInterval,
 } from "./libs/date-utility";
-import DateItem from "./components/DateItem";
+import { getPathYearMonth } from "./libs/get-path-year-month.js";
+import CalenderFild from "./components/CalenderFild";
 import CalenderHeader from "./components/CalenderHeader";
+import ScheduleRegistModal from "./components/ScheduleRegistModal";
 
 export default {
   name: "App",
   components: {
-    DateItem,
+    CalenderFild,
     CalenderHeader,
+    ScheduleRegistModal,
   },
 
   data() {
@@ -47,57 +61,41 @@ export default {
       inputStartTime: "",
       inputEndTime: "",
       rgistedSchedule: [],
+      editSchedule: null,
+      editScheduleIndex: "",
+      isModalOpen: false,
+      isEditType: false,
     };
   },
   computed: {
-    dispDate() {
+    formatDate() {
       return format(this.currentDate, "yyyy年MM月");
     },
     calendar() {
       const startDate = startOfMonth(this.currentDate);
       const endDate = endOfMonth(this.currentDate);
-      return dateInterval(startDate, endDate).map((days) => ({
-        date: format(days, "yyyy-MM-dd"),
-        day: this.daysOfWeek[getDay(days)],
+      const dateWeek = eachWeekOfInterval(startDate, endDate);
+      const endWeekDay = getDay(endDate); // 0-6
+      // 曜日と月日を取得
+      const monthDate = eachDayOfInterval(dateWeek[0], endDate).map((week) => ({
+        date: format(week, "yyyy-MM-dd"),
+        day: this.daysOfWeek[getDay(week)],
       }));
+      // 月末の週で曜日欄が空欄の場合、次の月日で埋める
+      let addedDateCount = 6 - endWeekDay;
+      for (let i = 1; i <= addedDateCount; i++) {
+        const addDate = addDays(endDate, i);
+        monthDate.push({
+          date: format(addDate, "yyyy-MM-dd"),
+          day: this.daysOfWeek[getDay(addDate)],
+        });
+      }
+      return monthDate;
     },
   },
   mounted() {
-    /*
-    const currentUrl = window.location.href;
-    const url = new URL(currentUrl);
-    const yearParam = !isNaN(Number(url.searchParams.get("year")))
-      ? url.searchParams.get("year")
-      : null;
-    const monthParam = !isNaN(Number(url.searchParams.get("month")))
-      ? url.searchParams.get("month")
-      : null;
-    if (yearParam && monthParam) {
-      this.currentDate = new Date(yearParam, monthParam - 1);
-    }
-    */
-    // 課題 正規表現
-    //const currentUrl = window.location.href;
-    //const url = new URL(currentUrl);
     const currentPath = window.location.pathname;
-    //console.log(currentPath);
-    const matchDate = currentPath.match(/^\/(\d{4})\/(0?[1-9]|1[0-2])\/?$/);
-    //console.log(matchDate);
-    if (matchDate) {
-      //const year = matchDate[1];
-      //const month = matchDate[2];
-      //console.log(`年: ${year}, 月: ${month}`);
-
-      this.currentDate = format(
-        new Date(`${matchDate[1]} / ${matchDate[2]}`),
-        "yyyy/MM"
-      );
-
-      //console.log(this.currentDate);
-    } else {
-      // console.log("NG: マッチしません。");
-      this.currentDate = new Date();
-    }
+    this.currentDate = getPathYearMonth(currentPath, format);
   },
   methods: {
     changeMonth(addDate) {
@@ -111,8 +109,6 @@ export default {
     urlParams() {
       const year = format(this.currentDate, "yyyy");
       const Month = format(this.currentDate, "MM");
-      //const newUrl = `${window.location.pathname}?year=${year}&month=${Month}`;
-      //console.log(window.location.origin);
       const newUrl = `${window.location.origin}/${year}/${Month}/`;
       window.history.pushState({ path: newUrl }, "", newUrl);
     },
@@ -124,12 +120,31 @@ export default {
         schedule: scheduleData.schedule,
       };
       this.rgistedSchedule.push(newSchedule);
+      this.modalClose();
     },
-    getSchedule(date) {
-      const scheduleDate = this.rgistedSchedule.filter(
-        (item) => item.date === date
-      );
-      return scheduleDate ? scheduleDate : null;
+    modalOpen() {
+      this.isModalOpen = true;
+    },
+    modalClose() {
+      this.isModalOpen = false;
+      this.isEditType = false;
+      this.editSchedule = null;
+      this.editScheduleIndex = "";
+    },
+    editModalOpen(scheduleIndex) {
+      this.editScheduleIndex = scheduleIndex;
+      this.editSchedule = this.rgistedSchedule[scheduleIndex];
+      this.isEditType = true;
+      this.modalOpen();
+    },
+    updatedSchedule(updatedSchedule, index) {
+      console.log("index:", index);
+      console.log("Updated Schedule:", updatedSchedule);
+      this.rgistedSchedule.splice(index, 1, {
+        ...this.rgistedSchedule[index],
+        ...updatedSchedule,
+      });
+      this.modalClose();
     },
   },
 };
@@ -141,9 +156,20 @@ li {
   margin: 0;
   list-style: none;
 }
+.day-Week,
+.date-list {
+  display: flex;
+  flex-wrap: wrap;
+  text-align: center;
+}
+
+.day-Week li,
 .date-list li {
   border-bottom: 1px solid #d3d3d3;
+  border-right: 1px solid #d3d3d3;
   padding: 12px 0;
+  max-width: calc(100% / 7);
+  width: 100%;
 }
 .btn {
   margin: 0 6px;

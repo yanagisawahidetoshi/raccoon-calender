@@ -1,34 +1,27 @@
 <template>
   <div class="menu">
-    <span class="nowMonth">{{ dispDate }}</span>
+    <span class="nowMonth">{{ formatDate }}</span>
     <Button className="arrow-left" @click="$emit('changeMonth', -1)" />
-    <Button tagName="span" @click="$emit('changeCurrentMonth')">当月</Button>
+    <Button tagName="span" @click="$emit('changeCurrentMonth')"> 当月 </Button>
     <Button className="arrow-right" @click="$emit('changeMonth', 1)" />
-
-    <ScheduleRegistModal @registerSchedule="registerSchedule($event)" />
+    <Button tagName="a" className="regist" @click="$emit('modalOpen')">
+      登録
+    </Button>
   </div>
 </template>
 
 <script>
 import Button from "./Button";
-import ScheduleRegistModal from "./ScheduleRegistModal";
 
 export default {
   name: "CalenderHeader",
-  props: {
-    dispDate: {
-      type: String,
-      default: "",
-    },
-  },
   components: {
     Button,
-    ScheduleRegistModal,
   },
-  methods: {
-    registerSchedule(evnet) {
-      this.$emit("registerSchedule", evnet);
-      this.$vm2.close("modalToRegistSchedule");
+  props: {
+    formatDate: {
+      type: String,
+      default: "",
     },
   },
 };

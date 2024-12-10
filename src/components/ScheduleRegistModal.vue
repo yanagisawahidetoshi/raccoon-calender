@@ -1,21 +1,13 @@
 <template>
   <div>
-    <Button
-      tagName="a"
-      className="regist"
-      @click="$vm2.open('modalToRegistSchedule')"
-    >
-      登録
-    </Button>
     <vue-modal-2
       name="modalToRegistSchedule"
-      @on-close="modalClose()"
       :headerOptions="{
-        title: '予定を登録',
+        title: isEditType ? '予定を編集' : '予定を登録',
       }"
       :footerOptions="{
         btn1: 'キャンセル',
-        btn2: '登録',
+        btn2: isEditType ? '更新' : '登録',
         btn1Style: {
           backgroundColor: '#cccccc',
         },
@@ -29,6 +21,7 @@
           this.submitRegist();
         },
       }"
+      @on-close="modalClose()"
     >
       <div class="input-wrap">
         {{ /* input:text */ }}
@@ -43,6 +36,7 @@
         <p>開始時間：<InputTime v-model="inputStartTime" /></p>
         <p>終了時間：<InputTime v-model="inputEndTime" /></p>
       </div>
+      {{ this.editScheduleIndex }}
     </vue-modal-2>
   </div>
 </template>
@@ -59,6 +53,24 @@ export default {
     InputTime,
     InputText,
   },
+  props: {
+    isModalOpen: {
+      type: Boolean,
+      required: true,
+    },
+    isEditType: {
+      type: Boolean,
+      required: true,
+    },
+    editScheduleIndex: {
+      type: Number,
+      default: -1,
+    },
+    editSchedule: {
+      type: Object,
+      default: () => null,
+    },
+  },
   data() {
     return {
       inputSchedule: "",
@@ -67,22 +79,47 @@ export default {
       inputEndTime: "",
     };
   },
-  methods: {
-    modalOpen() {
-      this.$vm2.open("modalToRegistSchedule");
+  watch: {
+    isModalOpen(isOpen) {
+      isOpen
+        ? this.$vm2.open("modalToRegistSchedule")
+        : this.$vm2.close("modalToRegistSchedule");
     },
+    editSchedule: {
+      // 参考：https://qiita.com/smkhkc/items/d5e1bc5580a62d060516
+      //handlerプロパティにハンドラを定義
+      handler(newVal) {
+        if (newVal) {
+          //console.log(this.editSchedule);
+          this.inputSchedule = newVal.schedule || "";
+          this.inputDate = newVal.date || "";
+          this.inputStartTime = newVal.startTime || "";
+          this.inputEndTime = newVal.endTime || "";
+        }
+      },
+      //immediate = 初期読み込み時にも呼び出す
+      immediate: true,
+    },
+  },
+  methods: {
     modalClose() {
       this.clearInputs();
-      this.$vm2.close("modalToRegistSchedule");
+      this.$emit("modalClose");
     },
     submitRegist() {
-      this.$emit("registerSchedule", {
+      const scheduleData = {
         date: this.inputDate,
         startTime: this.inputStartTime,
         endTime: this.inputEndTime,
         schedule: this.inputSchedule,
-      });
-      this.clearInputs();
+      };
+      // console.log(scheduleData);
+      // console.log(this.editScheduleIndex);
+      if (this.isEditType) {
+        this.$emit("updatedSchedule", scheduleData, this.editScheduleIndex);
+      } else {
+        this.$emit("registerSchedule", scheduleData);
+      }
     },
 
     clearInputs() {
