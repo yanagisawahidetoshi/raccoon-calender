@@ -6,6 +6,7 @@
       v-for="(schedule, index) in schedules"
       :key="index"
       class="calender-button"
+      @click="editSchedule(index)"
     >
       <div>
         {{ schedule.startTime }}～{{ schedule.finishTime }}
@@ -30,6 +31,10 @@ export default {
   methods: {
     formatDate(date, pattern) {
       return format(date, pattern);
+    },
+    editSchedule(index) {
+      // 行からモーダルを開く時は必ず編集になるため、編集したい予定の番号を渡す
+      this.$emit("editSchedule", index);
     },
   },
 };
