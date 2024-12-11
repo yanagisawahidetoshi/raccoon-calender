@@ -4,25 +4,27 @@
       <BaseButton @click="changeDate(-1)">前月</BaseButton>
       <BaseButton @click="changeCurrentMonth()">当月</BaseButton>
       <BaseButton @click="changeDate(1)">翌月</BaseButton>
-      <BaseButton @click="toggleScheduleRegistModal(true)">登録</BaseButton>
-      <!--vue-modal-2はグローバルに提供されている-->
+      <BaseButton @click="toggleModalRegistSchedule(true)">登録</BaseButton>
       {{ formatDate(currentDate, "yyyy年MMMM") }}
     </div>
-    <ModalRegistScheduleVue
-      @schedule="schedule"
+    <ModalSchedule
+      @newSchedule="addSchedule"
+      @toggleModalSchedule="toggleModalRegistSchedule"
       :isModalOpen="isScheduleRegistModalOpen"
-      @toggleScheduleRegistModal="toggleScheduleRegistModal"
+      :modalName="'modalRegistSchedule'"
+      :modalTitle="'予定の登録'"
+      :modalBtnName="'登録'"
     />
   </header>
 </template>
 
 <script>
 import BaseButton from "@/components/atoms/BaseButton.vue";
-import ModalRegistScheduleVue from "./ModalRegistSchedule.vue";
+import ModalSchedule from "./ModalSchedule.vue";
 import { format } from "../../../libs/date-util";
 export default {
   name: "CalenderHeader",
-  components: { BaseButton, ModalRegistScheduleVue },
+  components: { BaseButton, ModalSchedule },
   data() {
     return {
       isScheduleRegistModalOpen: false,
@@ -36,13 +38,13 @@ export default {
     },
   },
   methods: {
-    schedule(data) {
-      this.$emit("schedule", data);
+    addSchedule(data) {
+      this.$emit("addSchedule", data);
     },
     formatDate(data, f) {
       return format(data, f);
     },
-    toggleScheduleRegistModal(val) {
+    toggleModalRegistSchedule(val) {
       this.isScheduleRegistModalOpen = val;
     },
   },

@@ -4,15 +4,28 @@
       :changeDate="changeDate"
       :changeCurrentMonth="changeCurrentMonth"
       :currentDate="currentDate"
-      @schedule="schedule"
+      @addSchedule="addSchedule"
     />
     <section class="block">
       <ol class="list">
         <li class="detail" v-for="(date, index) in currentMonth" :key="index">
-          <CalenderDate :date="date" :schedule="filterSchedules(date)" />
+          <CalenderDate
+            :date="date"
+            :schedules="filterSchedules(date)"
+            @toggleModalEditSchedule="toggleModalEditSchedule"
+          />
         </li>
       </ol>
     </section>
+    <ModalSchedule
+      @toggleModalSchedule="toggleModalEditSchedule"
+      @newSchedule="updateSchedule"
+      :schedule="schedules[scheduleId]"
+      :isModalOpen="isScheduleEditModalOpen"
+      :modalName="'modalEditSchedule'"
+      :modalTitle="'予定の登録'"
+      :modalBtnName="'登録'"
+    />
   </div>
 </template>
 
@@ -24,20 +37,21 @@ import {
   format,
   addMonths,
   parse,
-  isSameYear,
-  isSameMonth,
   isSameDay,
 } from "./libs/date-util";
 import CalenderHeader from "./components/molecules/Calender/Header.vue";
 import CalenderDate from "./components/molecules/Calender/Date.vue";
+import ModalSchedule from "./components/molecules/Calender/ModalSchedule.vue";
 
 export default {
   name: "App",
-  components: { CalenderHeader, CalenderDate },
+  components: { CalenderHeader, CalenderDate, ModalSchedule },
   data() {
     return {
       currentDate: new Date(),
-      schedules: [],
+      schedules: [], //初期値は空。dateValue,startTimeValue,endTimeValue,id
+      isScheduleEditModalOpen: false,
+      scheduleId: Number,
     };
   },
   computed: {
@@ -83,19 +97,32 @@ export default {
     changeDate(num) {
       this.currentDate = addMonths(this.currentDate, num);
     },
-    schedule(data) {
-      this.schedules.push(data); //data内はdateValue,startTimeValue,endTimeValue
+    addSchedule(data) {
+      if (this.schedules.length === 0) {
+        // schedulesの初期値がnullの時はidを持っていないため、何もせず配列追加をする
+        this.schedules.push(data);
+      } else {
+        data.id = this.schedules[this.schedules.length - 1].id + 1;
+        this.schedules.push(data);
+      }
     },
     filterSchedules(date) {
-      const schedule = this.schedules.filter((v) => {
-        const dateValue = parse(v.dateValue, "yyyy-MM-dd", new Date()); // dateValueはyyyy-mm-ddなので、dayと比較するためフォーマットを揃える
-        return (
-          isSameYear(date, dateValue) &&
-          isSameMonth(date, dateValue) &&
-          isSameDay(date, dateValue)
-        );
+      const schedules = this.schedules.filter((v) => {
+        return isSameDay(date, v.dateValue);
       });
-      return schedule.length === 0 ? null : schedule[0];
+      return schedules;
+    },
+    updateSchedule(updateSchedule) {
+      this.schedules = this.schedules.map((v) => {
+        if (v.id === updateSchedule.id) {
+          return { ...v, ...updateSchedule };
+        }
+        return v;
+      });
+    },
+    toggleModalEditSchedule(val, id) {
+      this.isScheduleEditModalOpen = val;
+      this.scheduleId = id;
     },
   },
 };
