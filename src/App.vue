@@ -3,13 +3,25 @@
     <CalenderHeader
       @changeMonth="changeMonth"
       :date="currentDate"
-      @registeredSchedule="registeredSchedules"
+      @addNewSchedule="addNewSchedule"
     />
     <ol class="calendar-list">
       <li v-for="(date, index) in calendar" :key="index" class="calendar-item">
-        <CalenderRow :date="date" :schedules="filterScheduleByDate(date)" />
+        <CalenderRow
+          :date="date"
+          :schedules="filterScheduleByDate(date)"
+          :isEditModalOpen="isEditModalOpen"
+          @editSchedule="openEditModal"
+          @upDateSchedules="upDateSchedules"
+        />
       </li>
     </ol>
+    <!-- <ScheduleRegisterModal
+      @registeredSchedule="upDateSchedules"
+      @clickCloseButton="closeModal"
+      :isModalOpen="isModalOpen"
+      :editingSchedule="editingSchedule"
+    /> -->
   </div>
 </template>
 
@@ -25,18 +37,29 @@ import {
 
 import CalenderRow from "@/components/atoms/CalenderRow";
 import CalenderHeader from "@/components/morcules/CalenderHeader";
+// import ScheduleRegisterModal from "@/components/morcules/ScheduleRegisterModal";
 
 export default {
   name: "App",
   data() {
     return {
+      // isModalOpen: false,
+      isEditModalOpen: false,
       currentDate: null,
       schedules: [],
+      editIndex: null,
+      editingSchedule: {
+        content: "",
+        date: "",
+        startTime: "",
+        finishTime: "",
+      },
     };
   },
   components: {
     CalenderRow,
     CalenderHeader,
+    // ScheduleRegisterModal,
   },
   computed: {
     calendar() {
@@ -67,8 +90,38 @@ export default {
     getSearchParam(url, param) {
       return url.searchParams.get(param);
     },
-    registeredSchedules(newSchedule) {
+    // 新規登録
+    addNewSchedule(newSchedule) {
       this.schedules = [...this.schedules, newSchedule];
+    },
+    upDateSchedules(newSchedule) {
+      this.schedules = newSchedule;
+    },
+    // upDateSchedules(newSchedule) {
+    //   if (this.editIndex === null) {
+    //     this.schedules = [...this.schedules, newSchedule];
+    //     return;
+    //   }
+    //   // 編集時は、該当の予定を上書きする
+    //   const newSchedules = this.schedules.map((schedule, index) => {
+    //     return index === this.editIndex ? { ...newSchedule } : { ...schedule };
+    //   });
+    //   this.schedules = newSchedules;
+    // },
+    closeModal() {
+      this.isModalOpen = false;
+      this.editingSchedule = {
+        content: "",
+        date: "",
+        startTime: "",
+        finishTime: "",
+      };
+      this.editIndex = null;
+    },
+    openEditModal(index) {
+      this.isModalOpen = true;
+      this.editIndex = index;
+      this.editingSchedule = this.schedules[index];
     },
   },
   mounted() {
@@ -81,9 +134,11 @@ export default {
       this.currentDate = new Date();
       return;
     }
-    this.currentDate = 
-      parse(`${result[1]}-${result[2]}`, "yyyy-MM", new Date())
-    ;
+    this.currentDate = parse(
+      `${result[1]}-${result[2]}`,
+      "yyyy-MM",
+      new Date()
+    );
   },
   watch: {
     currentDate(newCurrentDate) {

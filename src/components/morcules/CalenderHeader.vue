@@ -35,11 +35,11 @@
       </li>
     </ul>
     <h1 class="title">{{ formatDate(date, "yyyy年M月") }}</h1>
-    <CommonButton @click="isModalOpen = true">登録</CommonButton>
+    <CommonButton @click="openRegisterModal">登録</CommonButton>
     <ScheduleRegisterModal
-      @registeredSchedule="(v) => $emit('registeredSchedule', v)"
+      @registeredSchedule="addNewSchedule"
       @clickCloseButton="closeModal"
-      :isModalOpen="isModalOpen"
+      :isEditModalOpen="isEditModalOpen"
     />
   </header>
 </template>
@@ -59,6 +59,9 @@ export default {
     date: {
       type: Date,
     },
+    isEditModalOpen: {
+      type: Boolean,
+    },
   },
   components: {
     CommonButton,
@@ -67,6 +70,12 @@ export default {
   methods: {
     formatDate(date, pattern) {
       return format(date, pattern);
+    },
+    openRegisterModal() {
+      this.isModalOpen = true;
+    },
+    addNewSchedule(schedule) {
+      this.$emit("addNewSchedule", schedule);
     },
     closeModal() {
       this.isModalOpen = false;

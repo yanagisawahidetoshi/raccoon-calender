@@ -7,7 +7,7 @@
     }"
     :footerOptions="{
       btn1: 'キャンセル',
-      btn2: '登録',
+      btn2: button2Name,
       btn1OnClick: () => {
         closeModalAddSchedule();
       },
@@ -36,6 +36,14 @@ export default {
     FormInputDate,
     FormInputTime,
   },
+  props: {
+    isModalOpen: {
+      type: Boolean,
+    },
+    editingSchedule: {
+      type: Object,
+    },
+  },
   data() {
     return {
       schedule: {
@@ -44,12 +52,8 @@ export default {
         startTime: "",
         finishTime: "",
       },
+      button2Name: "登録",
     };
-  },
-  props: {
-    isModalOpen: {
-      type: Boolean,
-    },
   },
   methods: {
     closeModalAddSchedule() {
@@ -75,6 +79,18 @@ export default {
       } else {
         this.$vm2.close("modal-add-schedule");
       }
+    },
+    editingSchedule(editSchedule) {
+      // ifをしないと、登録ボタンからモーダル出したときにエラーになる
+      if (!editSchedule) {
+        this.button2Name = "登録";
+        return;
+      }
+      this.schedule.content = editSchedule.content;
+      this.schedule.date = editSchedule.date;
+      this.schedule.startTime = editSchedule.startTime;
+      this.schedule.finishTime = editSchedule.finishTime;
+      this.button2Name = "編集";
     },
   },
 };
