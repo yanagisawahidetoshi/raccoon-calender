@@ -1,21 +1,14 @@
 <template>
   <div>
-    <Button
-      tagName="a"
-      className="regist"
-      @click="$vm2.open('modalToRegistSchedule')"
-    >
-      登録
-    </Button>
     <vue-modal-2
       name="modalToRegistSchedule"
-      @on-close="modalClose()"
       :headerOptions="{
-        title: '予定を登録',
+        title:
+          targetSchedule && targetSchedule.id ? '予定を編集' : '予定を登録',
       }"
       :footerOptions="{
         btn1: 'キャンセル',
-        btn2: '登録',
+        btn2: targetSchedule && targetSchedule.id ? '更新' : '登録',
         btn1Style: {
           backgroundColor: '#cccccc',
         },
@@ -26,22 +19,23 @@
           this.modalClose();
         },
         btn2OnClick: () => {
-          this.submitRegist();
+          this.handleSubmit();
         },
       }"
+      @on-close="modalClose()"
     >
       <div class="input-wrap">
         {{ /* input:text */ }}
         <p>
-          <InputText v-model="inputSchedule" placeholder="予定を入力" />
+          <InputText v-model="editSchedule.schedule" placeholder="予定を入力" />
         </p>
         {{ /* input:date */ }}
         <p>
-          <InputDate v-model="inputDate" />
+          <InputDate v-model="editSchedule.date" />
         </p>
         {{ /* input:time */ }}
-        <p>開始時間：<InputTime v-model="inputStartTime" /></p>
-        <p>終了時間：<InputTime v-model="inputEndTime" /></p>
+        <p>開始時間：<InputTime v-model="editSchedule.startTime" /></p>
+        <p>終了時間：<InputTime v-model="editSchedule.endTime" /></p>
       </div>
     </vue-modal-2>
   </div>
@@ -59,37 +53,52 @@ export default {
     InputTime,
     InputText,
   },
+  props: {
+    isModalOpen: {
+      type: Boolean,
+      required: true,
+    },
+    targetSchedule: {
+      type: Object,
+      default: () => ({
+        id: "",
+        date: "",
+        startTime: "",
+        endTime: "",
+        schedule: "",
+      }),
+    },
+  },
   data() {
     return {
-      inputSchedule: "",
-      inputDate: "",
-      inputStartTime: "",
-      inputEndTime: "",
+      editSchedule: {
+        id: "",
+        date: "",
+        startTime: "",
+        endTime: "",
+        schedule: "",
+      },
     };
   },
+  watch: {
+    isModalOpen(isOpen) {
+      if (isOpen) {
+        this.$vm2.open("modalToRegistSchedule");
+        if (this.targetSchedule) {
+          this.editSchedule = { ...this.targetSchedule };
+        }
+      } else {
+        this.$vm2.close("modalToRegistSchedule");
+      }
+    },
+  },
   methods: {
-    modalOpen() {
-      this.$vm2.open("modalToRegistSchedule");
-    },
     modalClose() {
-      this.clearInputs();
-      this.$vm2.close("modalToRegistSchedule");
+      this.$emit("modalClose");
     },
-    submitRegist() {
-      this.$emit("registerSchedule", {
-        date: this.inputDate,
-        startTime: this.inputStartTime,
-        endTime: this.inputEndTime,
-        schedule: this.inputSchedule,
-      });
-      this.clearInputs();
-    },
-
-    clearInputs() {
-      this.inputSchedule = "";
-      this.inputDate = "";
-      this.inputStartTime = "";
-      this.inputEndTime = "";
+    handleSubmit() {
+      const scheduleData = { ...this.editSchedule };
+      this.$emit("onSubmit", scheduleData);
     },
   },
 };

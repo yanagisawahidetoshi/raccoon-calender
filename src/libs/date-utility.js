@@ -5,6 +5,9 @@ import {
 	format as dateFnsFormat,
 	getDay as dateFnsGetDay,
 	addMonths as dateFnsAddMonths,
+	eachWeekOfInterval as dateFnsEachWeekOfInterval,
+	eachDayOfInterval as dateFnsEachDayOfInterval,
+	addDays as dateFnsAddDays,
 } from "date-fns";
 // import * as dateFns from "date-fns";
 /*-----*/
@@ -27,7 +30,22 @@ export const dateInterval = (startDate, endDate) => {
 export const addMonths = (currentDate, monthToAdd) => {
 	return dateFnsAddMonths(currentDate, monthToAdd);
 }
+export const addDays = (endDate, dateToAdd) => {
+	return dateFnsAddDays(endDate, dateToAdd);
+}
 export const format = (currentDate, dateFormat) => {
 	return dateFnsFormat(currentDate, dateFormat);
+}
+export const eachWeekOfInterval = (startDate, endDate) => {
+	return dateFnsEachWeekOfInterval({
+		start: startDate,
+		end: endDate
+	});
+}
+export const eachDayOfInterval = (startDate, endDate) => {
+	return dateFnsEachDayOfInterval({
+		start: startDate,
+		end: endDate
+	});
 }
 

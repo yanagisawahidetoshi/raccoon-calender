@@ -18,7 +18,6 @@ export default {
   },
   methods: {
     validate(inputValue) {
-      //console.log(value);
       const datePattern = /^(0[0-9]|1[0-9]|2[0-3]):([0-5][0-9])$/;
       if (datePattern.test(inputValue)) {
         this.$emit("input", inputValue);
