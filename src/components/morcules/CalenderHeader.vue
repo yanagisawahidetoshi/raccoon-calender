@@ -35,11 +35,13 @@
       </li>
     </ul>
     <h1 class="title">{{ formatDate(date, "yyyy年M月") }}</h1>
-    <CommonButton @click="isModalOpen = true">登録</CommonButton>
+    <CommonButton @click="openRegisterModal">登録</CommonButton>
     <ScheduleRegisterModal
-      @registeredSchedule="(v) => $emit('registeredSchedule', v)"
+      @registeredSchedule="(newSchedule) => $emit('onAddSchedule', newSchedule)"
       @clickCloseButton="closeModal"
       :isModalOpen="isModalOpen"
+      button2Name="登録"
+      modalName="modal-new-schedule"
     />
   </header>
 </template>
@@ -67,6 +69,9 @@ export default {
   methods: {
     formatDate(date, pattern) {
       return format(date, pattern);
+    },
+    openRegisterModal() {
+      this.isModalOpen = true;
     },
     closeModal() {
       this.isModalOpen = false;

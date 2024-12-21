@@ -3,13 +3,13 @@
     <CalenderHeader
       @changeMonth="changeMonth"
       :date="currentDate"
-      @registeredSchedule="registeredSchedules"
+      @onAddSchedule="addNewSchedule"
     />
-    <ol class="calendar-list">
-      <li v-for="(date, index) in calendar" :key="index" class="calendar-item">
-        <CalenderRow :date="date" :schedules="filterScheduleByDate(date)" />
-      </li>
-    </ol>
+    <CalenderList
+      :schedules="schedules"
+      :calendar="calendar"
+      @onUpdate="upDateSchedule"
+    />
   </div>
 </template>
 
@@ -23,8 +23,8 @@ import {
   parse,
 } from "./libs/dateUtil.js";
 
-import CalenderRow from "@/components/atoms/CalenderRow";
 import CalenderHeader from "@/components/morcules/CalenderHeader";
+import CalenderList from "@/components/morcules/CalenderList";
 
 export default {
   name: "App",
@@ -35,8 +35,8 @@ export default {
     };
   },
   components: {
-    CalenderRow,
     CalenderHeader,
+    CalenderList,
   },
   computed: {
     calendar() {
@@ -49,12 +49,6 @@ export default {
     },
   },
   methods: {
-    filterScheduleByDate(date) {
-      const target = this.formatDate(date, "yyyy-MM-dd");
-      return this.schedules.filter((schedule) => {
-        return target === schedule.date;
-      });
-    },
     formatDate(date, pattern) {
       return format(date, pattern);
     },
@@ -67,8 +61,12 @@ export default {
     getSearchParam(url, param) {
       return url.searchParams.get(param);
     },
-    registeredSchedules(newSchedule) {
-      this.schedules = [...this.schedules, newSchedule];
+    addNewSchedule(newSchedule) {
+      const id = this.schedules.length > 0 ? this.schedules.at(-1).id + 1 : 1;
+      this.schedules = [...this.schedules, { ...newSchedule, id }];
+    },
+    upDateSchedule(newSchedule) {
+      this.schedules = newSchedule;
     },
   },
   mounted() {
@@ -81,9 +79,11 @@ export default {
       this.currentDate = new Date();
       return;
     }
-    this.currentDate = 
-      parse(`${result[1]}-${result[2]}`, "yyyy-MM", new Date())
-    ;
+    this.currentDate = parse(
+      `${result[1]}-${result[2]}`,
+      "yyyy-MM",
+      new Date()
+    );
   },
   watch: {
     currentDate(newCurrentDate) {
