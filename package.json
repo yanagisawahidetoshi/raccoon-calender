@@ -11,6 +11,7 @@
   "dependencies": {
     "@burhanahmeed/vue-modal-2": "^1.1.11",
     "@vue/composition-api": "^1.7.2",
+    "axios": "^1.8.1",
     "core-js": "^3.8.3",
     "date-fns": "^4.1.0",
     "destyle.css": "^4.0.1",

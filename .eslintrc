@@ -2,7 +2,9 @@
   "parser": "vue-eslint-parser",
   "extends": ["plugin:vue/recommended", "eslint:recommended"],
   "env": {
-    "jest": true
+    "browser": true,
+    "jest": true,
+    "es2020": true
   },
   "parserOptions": {
     "ecmaVersion": 2020,
