@@ -23,34 +23,28 @@
   </div>
 </template>
 
+
 <script>
-import { format } from "../libs/date-fns";
-import ScheduleModal from "../components/ScheduleModal.vue";
+import ScheduleModal from "./ScheduleModal.vue";
+import { useCalenderHeader } from "./CalenderHeader/hooks/useCalenderHeader.js"
 
 export default {
   name: "CalenderHeader",
+	comments:{ScheduleModal},
   props: {
     currentDate: { type: Date },
   },
-  data() {
-    return {
-      isModalOpen: false,
-    };
-  },
-  components: { ScheduleModal },
-  computed: {
-    title() {
-      //console.log(this.currentDate);
-      return format(this.currentDate, "yyyy年MM月");
-    },
-  },
-  methods: {
-    openScheduleModal() {
-      this.isModalOpen = true;
-    },
-    closeScheduleModal() {
-      this.isModalOpen = false;
-    },
-  },
+	setup(props) {
+		const {isModalOpen,openScheduleModal,closeScheduleModal,title} =
+		useCalenderHeader(props.currentDate);
+
+		return {
+			isModalOpen,
+			openScheduleModal,
+			closeScheduleModal,
+			title,
+		}
+	}
+
 };
 </script>

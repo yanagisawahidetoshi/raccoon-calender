@@ -21,8 +21,10 @@
   </div>
 </template>
 <script>
-import { format } from "../libs/date-fns";
+
 import ScheduleModal from "../components/ScheduleModal.vue";
+import { useDateRow } from "./CalenderHeader/hooks/useDateRow.js"
+
 export default {
   name: "DateRow",
   components: { ScheduleModal },
@@ -33,23 +35,16 @@ export default {
     },
   },
 
-  data() {
-    return {
-      isModalOpen: false,
-      defaultSchedule: "",
-    };
-  },
-  methods: {
-    formatDate(date) {
-      return format(date, "MM月dd日");
-    },
-    openScheduleModal(schedule) {
-      this.defaultSchedule = JSON.parse(JSON.stringify(schedule));
-      this.isModalOpen = true;
-    },
-    closeScheduleModal() {
-      this.isModalOpen = false;
-    },
-  },
+	setup(props) {
+		const {isModalOpen,openScheduleModal,closeScheduleModal,formatDate,defaultSchedule} =
+		useDateRow(props.date,props.schedules);
+		return {
+			isModalOpen,
+			openScheduleModal,
+			closeScheduleModal,
+			formatDate,
+			defaultSchedule,
+		}
+	}
 };
 </script>
