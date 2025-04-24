@@ -2,16 +2,19 @@
   <div class="row">
     <p>{{ formatDate(date, "d") }}</p>
     <p class="day">{{ formatDate(date, "E") }}</p>
-    <button
-      v-for="(schedule, index) in schedules"
-      :key="index"
-      class="calender-button"
-    >
-      <div>
-        {{ schedule.startTime }}～{{ schedule.finishTime }}
-        {{ schedule.content }}
-      </div>
-    </button>
+    <div v-for="(schedule, index) in schedules" :key="index">
+      <button
+        type="button"
+        class="calender-button"
+        @click="openEditModal(schedule)"
+      >
+        <div>
+          ID:{{ schedule.id }}<br />
+          {{ schedule.startTime }}～{{ schedule.finishTime }}
+          {{ schedule.content }}
+        </div>
+      </button>
+    </div>
   </div>
 </template>
 <script>
@@ -30,6 +33,9 @@ export default {
   methods: {
     formatDate(date, pattern) {
       return format(date, pattern);
+    },
+    openEditModal(schedule) {
+      this.$emit("onEditingSchedule", schedule);
     },
   },
 };
