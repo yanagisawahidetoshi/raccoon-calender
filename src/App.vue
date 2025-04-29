@@ -1,41 +1,17 @@
 <template>
   <div id="app">
-    <div>
-      <button type="submit" @click="changeMonth(-1)">前月</button>
-      <button type="submit" @click="changeToCurrentMonth">当月</button>
-      <button type="submit" @click="changeMonth(1)">翌月</button>
-      <h1>{{ format(currentDay, "yyyy/MM") }}</h1>
-      <button type="submit" @click="openModal('registNewSchedule-modal')">
-        登録
-      </button>
-    </div>
+    <CalenderHeader
+      :currentDate="currentDate"
+      @changeMonth="changeMonth"
+      @changeToCurrentMonth="changeToCurrentMonth"
+      @registSchedule="registSchedule"
+    />
     <ol>
       <li v-for="(date, index) in dates" :key="index">
-        <p>{{ format(date, "MM/dd EE") }}</p>
+        {{ format(date, "dd EE") }}
+        <DateRow :date="date" :schedules="schedules" />
       </li>
     </ol>
-    <vue-modal-2
-      name="registNewSchedule-modal"
-      @on-close="closeModal('registNewSchedule-modal')"
-      :headerOptions="{ title: '予定を登録' }"
-      :footerOptions="{
-        btn1: 'キャンセル',
-        btn2: '登録',
-        btn2Style: {
-          backgroundColor: 'blue',
-        },
-        btn1OnClick: () => {
-          closeModal('registNewSchedule-modal');
-        },
-        btn2OnClick: () => {
-          regist();
-        },
-      }"
-    >
-      <InputDate v-model="inputDate" />
-      <InputTime v-model="inputTime" />
-      <InputText v-model="inputText" />
-    </vue-modal-2>
   </div>
 </template>
 
@@ -47,29 +23,35 @@ import {
   format,
   addMonths,
 } from "./libs/date-util.js";
-import InputDate from "./components/atoms/InputDate";
-import InputText from "./components/atoms/InputText";
-import InputTime from "./components/atoms/InputTime";
-
+import DateRow from "./components/molecules/DateRow";
+import CalenderHeader from "./components/organisms/CalenderHeader";
 export default {
   name: "App",
   components: {
-    InputDate,
-    InputText,
-    InputTime,
+    DateRow,
+    CalenderHeader,
   },
   data() {
     return {
-      currentDay: new Date(),
-      inputDate: "2024-10-28",
-      inputText: "aaa",
-      inputTime: "10:12",
+      currentDate: new Date(),
+      schedules: [],
     };
+  },
+  mounted() {
+    const currentURL = window.location.href;
+    const match = currentURL.match(
+      /^https?:\/\/.*\/([0-9]{4})\/(0[1-9]|1[0-2])\/?.*$/
+    );
+    if (match) {
+      const yearFromURL = match[1];
+      const monthFromURL = match[2].padStart(2, 0);
+      this.currentDate = new Date(yearFromURL + "-" + monthFromURL + "-01");
+    }
   },
   computed: {
     dates() {
-      const start = startOfMonth(this.currentDay);
-      const end = lastDayOfMonth(this.currentDay);
+      const start = startOfMonth(this.currentDate);
+      const end = lastDayOfMonth(this.currentDate);
       return eachDayOfInterval({ start, end });
     },
   },
@@ -78,18 +60,20 @@ export default {
       return format(date, pattern);
     },
     changeMonth(num) {
-      this.currentDay = addMonths(this.currentDay, num);
+      this.currentDate = addMonths(this.currentDate, num);
+      window.history.pushState(
+        {},
+        "",
+        this.format(this.currentDate, "/yyyy/MM/")
+      );
     },
     changeToCurrentMonth() {
-      this.currentDay = new Date();
+      this.currentDate = new Date();
     },
-    openModal(name) {
-      this.$vm2.open(name);
+    registSchedule(newSchedule) {
+      const id = this.schedules?.at(-1)?.id ?? 0;
+      this.schedules.push({ ...newSchedule, id: id + 1 });
     },
-    closeModal(name) {
-      this.$vm2.close(name);
-    },
-    regist() {},
   },
 };
 </script>
